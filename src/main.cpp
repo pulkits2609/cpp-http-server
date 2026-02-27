@@ -22,6 +22,23 @@ int main(int argc, char* argv[]){
     }
     std::cout<<"Socket Binding Successfull\n";
     Serv.PrintServerAddress();
+
+    if(!Serv.ListenTCPSocket(5)){
+        perror("Error Listening : ");
+        Serv.CloseTCPSocket();
+        return -1;
+    }
+    std::cout<<":::::::::: Server Listening ::::::::::\n";
+    while(1){
+        if(!Serv.AcceptTCPSocket()){
+            perror("Error Accepting Client");
+            continue;
+        }
+        std::cout<<"Client Connected : ";
+        Serv.PrintClientAddress();
+        Serv.CloseClientSession();
+    }
+
     Serv.CloseTCPSocket();
     return 0;
 }

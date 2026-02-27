@@ -7,14 +7,31 @@
 class ServerSocket{
     private:
     int SocketFD=-1;
+
+    int SessionFD=-1; //for now single SessionFD To manage single Cient at a time (BLOCKING)
+    
     sockaddr_in ServerAddress{};
     
     public: 
-    sockaddr_in ConnectedClientAddress;
+    sockaddr_in ConnectedClientAddress{};
+
     bool CreateTCPSocket();
+
     bool BindTCPSocket(std::string ip,int port);
-    void ListenTCPSocket(int backlog);
-    void ConnectTCPSocket();
+    
+    bool ListenTCPSocket(int backlog);
+    
+    bool AcceptTCPSocket();
+
+    void PrintClientAddress();
+
+    bool ReadClientRequest(); //used to parse the method requested by the client
+
+    bool WriteClientRequest();//send appropriate response to client
+
+    void CloseClientSession();
+    
     void CloseTCPSocket();
+    
     void PrintServerAddress();
 };

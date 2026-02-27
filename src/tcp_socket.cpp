@@ -27,8 +27,39 @@ bool ServerSocket::BindTCPSocket(std::string ip,int port){
     return true;
 }
 
+bool ServerSocket::ListenTCPSocket(int backlog){
+    int ret=listen(SocketFD,backlog);
+    if(ret < 0)return false;
+    return true;
+}
+
+bool ServerSocket::AcceptTCPSocket(){
+    memset(&ConnectedClientAddress,0,sizeof(ConnectedClientAddress));
+    socklen_t len = sizeof(ConnectedClientAddress);
+
+    SessionFD = accept(SocketFD,(struct sockaddr*)&ConnectedClientAddress,&len);
+    if(SessionFD < 0){
+        return false;
+    }
+    return true;
+}
+
+void ServerSocket::PrintClientAddress(){
+    char CLIENT_IP[INET_ADDRSTRLEN];
+    if(!inet_ntop(AF_INET,&ConnectedClientAddress.sin_addr,CLIENT_IP,INET_ADDRSTRLEN)){
+        perror("inet_atop failed :");
+    }
+    else{
+        std::cout<<"Address : "<<CLIENT_IP<<":"<<ntohs(ConnectedClientAddress.sin_port)<<"\n";
+    }
+}
+
 void ServerSocket::CloseTCPSocket(){
     close(SocketFD);
+}
+
+void ServerSocket::CloseClientSession(){
+    close(SessionFD);
 }
 
 void ServerSocket::PrintServerAddress(){
