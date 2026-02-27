@@ -16,4 +16,5 @@ class ServerSocket{
     void ListenTCPSocket(int backlog);
     void ConnectTCPSocket();
     void CloseTCPSocket();
+    void PrintServerAddress();
 };

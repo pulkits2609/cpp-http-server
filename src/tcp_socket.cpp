@@ -30,3 +30,7 @@ bool ServerSocket::BindTCPSocket(std::string ip,int port){
 void ServerSocket::CloseTCPSocket(){
     close(SocketFD);
 }
+
+void ServerSocket::PrintServerAddress(){
+    std::cout<<"Server Address : "<<inet_ntoa(ServerAddress.sin_addr)<<":"<<ntohs(ServerAddress.sin_port)<<"\n";
+}
