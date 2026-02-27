@@ -1,12 +1,14 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 
-project(cpp_http_server VERSION 1.0 LANGUAGES CXX)
+project(http_server)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_executable(cpp-http-server
-    src/main.cpp
+add_executable(http_server
+	src/main.cpp
+	src/tcp_socket.cpp
 )
 
-target_include_directories(cpp-http-server PRIVATE include)
+target_include_directories(http_server PRIVATE include)
