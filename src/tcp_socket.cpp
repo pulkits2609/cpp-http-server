@@ -6,11 +6,16 @@
 #include<unistd.h>
 #include<cstring>
 #include"tcp_socket.hpp"
-#define MAX_ALLOWED 512
+#define MAX_ALLOWED 1024
 
 bool ServerSocket::CreateTCPSocket(){
     SocketFD = socket(AF_INET,SOCK_STREAM,0); //create TCP Socket
     if(SocketFD < 0){
+        return false;
+    }
+    int opt=1;
+    if(setsockopt(SocketFD,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt))){
+        perror("setsockopt failed :");
         return false;
     }
     return true;
@@ -54,6 +59,10 @@ void ServerSocket::PrintClientAddress(){
     }
 }
 
+int ServerSocket::GiveSessionFD(){
+    return SessionFD;
+}
+
 void ServerSocket::CloseTCPSocket(){
     close(SocketFD);
 }
@@ -64,4 +73,29 @@ void ServerSocket::CloseClientSession(){
 
 void ServerSocket::PrintServerAddress(){
     std::cout<<"Server Address : "<<inet_ntoa(ServerAddress.sin_addr)<<":"<<ntohs(ServerAddress.sin_port)<<"\n";
+}
+
+/////////////////////////////debugging functions
+void ServerSocket::ClientMessageStream(){
+    int ret=-1;
+    char ReadBuff[1024]{};
+    size_t ReadBytes=0;
+    std::cout<<"\n::::::::::Client Message Stream::::::::::::\n";
+    while(1){
+        memset(&ReadBuff,0,sizeof(ReadBuff)); 
+        ret = read(SessionFD,&ReadBuff,sizeof(ReadBuff));
+        if(ret < -1){
+            perror("Error Reading from client :");
+            break;
+        }
+        else if(ret == 0){
+            std::cout<<"\n::::::::::::::::\nEnd of Client Message Stream\n";
+            std::cout<<"Bytes Read : "<<ReadBytes<<"\n";
+            break;
+        }
+        else{
+            ReadBytes+=ret;
+            std::cout.write(ReadBuff,ret); //write the exact number of bytes read ! 
+        }
+    }
 }

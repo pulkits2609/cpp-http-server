@@ -1,6 +1,7 @@
 //main.cpp
 #include<iostream>
 #include"../include/tcp_socket.hpp"
+#include"../include/http_handler.hpp"
 
 int main(int argc, char* argv[]){
     if (argc != 2) {
@@ -36,9 +37,16 @@ int main(int argc, char* argv[]){
         }
         std::cout<<"Client Connected : ";
         Serv.PrintClientAddress();
+
+        http_handler HttpHandler{};
+        HttpHandler.GetSessionFD(Serv.GiveSessionFD());
+        HttpHandler.ReadClientRequest();
+        HttpHandler.PrintClientRequestString();
+
+        //Serv.ClientMessageStream();
         Serv.CloseClientSession();
     }
-
+    
     Serv.CloseTCPSocket();
     return 0;
 }

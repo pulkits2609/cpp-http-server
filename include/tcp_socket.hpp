@@ -1,4 +1,5 @@
 //tcp_socket.hpp
+//transport layer abstraction
 #pragma once
 #include<sys/socket.h>
 #include<arpa/inet.h>
@@ -23,6 +24,8 @@ class ServerSocket{
     
     bool AcceptTCPSocket();
 
+    int GiveSessionFD(); //this will be used by http_handler to get sessionFD
+
     void PrintClientAddress();
 
     bool ReadClientRequest(); //used to parse the method requested by the client
@@ -34,4 +37,8 @@ class ServerSocket{
     void CloseTCPSocket();
     
     void PrintServerAddress();
+
+
+    //////////DEBUGGING FUNCTIONS , NOT SAFE FOR PRODUCTION
+    void ClientMessageStream();
 };
