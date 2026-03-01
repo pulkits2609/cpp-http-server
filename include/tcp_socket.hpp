@@ -30,7 +30,7 @@ class ServerSocket{
 
     bool ReadClientRequest(); //used to parse the method requested by the client
 
-    bool WriteClientRequest();//send appropriate response to client
+    bool WriteClientResponse(const std::string& Response);//send appropriate response to client
 
     void CloseClientSession();
     

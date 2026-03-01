@@ -43,6 +43,11 @@ int main(int argc, char* argv[]){
         HttpHandler.ReadClientRequest();
         HttpHandler.PrintClientRequestString();
 
+        if(!Serv.WriteClientResponse(HttpHandler.SendClientResponse())){
+            perror("Error Writing Response to Client : ");
+        }
+        std::cout<<"\nSent Client Response !\n";
+
         //Serv.ClientMessageStream();
         Serv.CloseClientSession();  
     }

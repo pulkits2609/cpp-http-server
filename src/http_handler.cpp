@@ -65,6 +65,18 @@ size_t http_handler::ParseContentLength(){
 
 }
 
+std::string http_handler::SendClientResponse(){
+    std::string Response = //creating basic minimal response
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Type: text/plain\r\n"
+        "Content-Length: 5\r\n"
+        "Connection: close\r\n"
+        "\r\n"
+        "Hello";
+    return Response;
+}
+
+//DEBUGGING FUNCTION
 void http_handler::PrintClientRequestString(){
     std::cout<<"Client Request header : \n";
     std::cout<<RequestHeader<<"\n";

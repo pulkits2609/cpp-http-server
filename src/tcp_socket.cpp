@@ -76,6 +76,14 @@ void ServerSocket::PrintServerAddress(){
     std::cout<<"Server Address : "<<inet_ntoa(ServerAddress.sin_addr)<<":"<<ntohs(ServerAddress.sin_port)<<"\n";
 }
 
+bool ServerSocket::WriteClientResponse(const std::string& Response){
+    int ret = write(SessionFD, Response.data(),Response.size());
+    if(ret < 0){
+        return false;
+    }
+    return true;
+}
+
 /////////////////////////////debugging functions
 void ServerSocket::ClientMessageStream(){
     int ret=-1;
