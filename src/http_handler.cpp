@@ -28,8 +28,46 @@ void http_handler::ReadClientRequest(){
             RequestString.append(ReadBuffer,ret);
         }
     }
+    size_t header_end = RequestString.find("\r\n\r\n");
+    RequestHeader = RequestString.substr(0, header_end);
+    RequestBody = RequestString.substr(header_end + 4);
+
+    //Parse Content-Length
+    size_t content_length = ParseContentLength();
+
+    // Reading remaining body if incomplete
+    while (RequestBody.size() < content_length) {
+        int ret = read(SessionFD, ReadBuffer, sizeof(ReadBuffer));
+        if (ret <= 0) {
+            perror("Error Reading Body:");
+            return;
+        }
+        RequestBody.append(ReadBuffer, ret);
+    }
+}
+
+size_t http_handler::ParseContentLength(){
+    size_t pos = RequestHeader.find("Content-Length:");
+
+    if(pos == std::string::npos) return 0; //no body is there
+
+    size_t value_start = pos + 15; // length of "Content-Length:"
+    while (RequestHeader[value_start] == ' ')
+        value_start++;
+
+    size_t value_end = RequestHeader.find("\r\n", value_start);
+
+    std::string length_str =
+        RequestHeader.substr(value_start, value_end - value_start);
+
+    return std::stoul(length_str);
+
+
 }
 
 void http_handler::PrintClientRequestString(){
-    std::cout<<RequestString<<"\n";
+    std::cout<<"Client Request header : \n";
+    std::cout<<RequestHeader<<"\n";
+    std::cout<<"Client Request Body :\n";
+    std::cout<<RequestBody<<"\n";
 }

@@ -69,6 +69,7 @@ void ServerSocket::CloseTCPSocket(){
 
 void ServerSocket::CloseClientSession(){
     close(SessionFD);
+    std::cout<<"Client Connection Closed\n";
 }
 
 void ServerSocket::PrintServerAddress(){

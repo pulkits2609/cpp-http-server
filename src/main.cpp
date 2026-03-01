@@ -44,7 +44,7 @@ int main(int argc, char* argv[]){
         HttpHandler.PrintClientRequestString();
 
         //Serv.ClientMessageStream();
-        Serv.CloseClientSession();
+        Serv.CloseClientSession();  
     }
     
     Serv.CloseTCPSocket();
