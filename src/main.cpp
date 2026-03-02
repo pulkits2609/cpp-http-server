@@ -1,7 +1,7 @@
 //main.cpp
 #include<iostream>
-#include"../include/tcp_socket.hpp"
-#include"../include/http_handler.hpp"
+#include"tcp_socket.hpp"
+#include"http_handler.hpp"
 
 int main(int argc, char* argv[]){
     if (argc != 2) {
@@ -10,48 +10,48 @@ int main(int argc, char* argv[]){
     }
 
     std::cout<<"Server Starting\n";
-    ServerSocket Serv;
-    if(!Serv.CreateTCPSocket()){
+    ServerSocket server_socket;
+    if(!server_socket.createTCPSocket()){
         perror("Error Creating Socket");
         return -1;
     }
     std::cout<<"Socket Creation Successful\n";
-    if(!Serv.BindTCPSocket(argv[1],9000)){
+    if(!server_socket.bindTCPSocket(argv[1],9000)){
         perror("Binding Socket Failed");
-        Serv.CloseTCPSocket();
+        server_socket.closeTCPSocket();
         return -1;
     }
     std::cout<<"Socket Binding Successfull\n";
-    Serv.PrintServerAddress();
+    server_socket.printServerAddress();
 
-    if(!Serv.ListenTCPSocket(5)){
+    if(!server_socket.listenTCPSocket(5)){
         perror("Error Listening : ");
-        Serv.CloseTCPSocket();
+        server_socket.closeTCPSocket();
         return -1;
     }
     std::cout<<":::::::::: Server Listening ::::::::::\n";
     while(1){
-        if(!Serv.AcceptTCPSocket()){
+        if(!server_socket.acceptTCPSocket()){
             perror("Error Accepting Client");
             continue;
         }
         std::cout<<"Client Connected : ";
-        Serv.PrintClientAddress();
+        server_socket.printClientAddress();
 
-        http_handler HttpHandler{};
-        HttpHandler.GetSessionFD(Serv.GiveSessionFD());
-        HttpHandler.ReadClientRequest();
-        HttpHandler.PrintClientRequestString();
+        HttpHandler http_handler{};
+        http_handler.getSessionFD(server_socket.giveSessionFD());
+        http_handler.readClientRequest();
+        http_handler.printClientRequestString();
 
-        if(!Serv.WriteClientResponse(HttpHandler.SendClientResponse())){
+        if(!server_socket.writeClientResponse(http_handler.sendClientResponse())){
             perror("Error Writing Response to Client : ");
         }
         std::cout<<"\nSent Client Response !\n";
 
-        //Serv.ClientMessageStream();
-        Serv.CloseClientSession();  
+        //server_socket.ClientMessageStream();
+        server_socket.closeClientSession();  
     }
     
-    Serv.CloseTCPSocket();
+    server_socket.closeTCPSocket();
     return 0;
 }

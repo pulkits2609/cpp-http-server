@@ -8,7 +8,7 @@
 #include"tcp_socket.hpp"
 #define MAX_ALLOWED 1024
 
-bool ServerSocket::CreateTCPSocket(){
+bool ServerSocket::createTCPSocket(){
     SocketFD = socket(AF_INET,SOCK_STREAM,0); //create TCP Socket
     if(SocketFD < 0){
         return false;
@@ -21,7 +21,7 @@ bool ServerSocket::CreateTCPSocket(){
     return true;
 };
 
-bool ServerSocket::BindTCPSocket(std::string ip,int port){
+bool ServerSocket::bindTCPSocket(std::string ip,int port){
     if(!inet_pton(AF_INET,ip.data(),&ServerAddress.sin_addr)){
         return false;
     }
@@ -32,13 +32,13 @@ bool ServerSocket::BindTCPSocket(std::string ip,int port){
     return true;
 }
 
-bool ServerSocket::ListenTCPSocket(int backlog){
+bool ServerSocket::listenTCPSocket(int backlog){
     int ret=listen(SocketFD,backlog);
     if(ret < 0)return false;
     return true;
 }
 
-bool ServerSocket::AcceptTCPSocket(){
+bool ServerSocket::acceptTCPSocket(){
     memset(&ConnectedClientAddress,0,sizeof(ConnectedClientAddress));
     socklen_t len = sizeof(ConnectedClientAddress);
 
@@ -49,7 +49,7 @@ bool ServerSocket::AcceptTCPSocket(){
     return true;
 }
 
-void ServerSocket::PrintClientAddress(){
+void ServerSocket::printClientAddress(){
     char CLIENT_IP[INET_ADDRSTRLEN];
     if(!inet_ntop(AF_INET,&ConnectedClientAddress.sin_addr,CLIENT_IP,INET_ADDRSTRLEN)){
         perror("inet_atop failed :");
@@ -59,24 +59,24 @@ void ServerSocket::PrintClientAddress(){
     }
 }
 
-int ServerSocket::GiveSessionFD(){
+int ServerSocket::giveSessionFD(){
     return SessionFD;
 }
 
-void ServerSocket::CloseTCPSocket(){
+void ServerSocket::closeTCPSocket(){
     close(SocketFD);
 }
 
-void ServerSocket::CloseClientSession(){
+void ServerSocket::closeClientSession(){
     close(SessionFD);
     std::cout<<"Client Connection Closed\n";
 }
 
-void ServerSocket::PrintServerAddress(){
+void ServerSocket::printServerAddress(){
     std::cout<<"Server Address : "<<inet_ntoa(ServerAddress.sin_addr)<<":"<<ntohs(ServerAddress.sin_port)<<"\n";
 }
 
-bool ServerSocket::WriteClientResponse(const std::string& Response){
+bool ServerSocket::writeClientResponse(const std::string& Response){
     int ret = write(SessionFD, Response.data(),Response.size());
     if(ret < 0){
         return false;
@@ -85,7 +85,7 @@ bool ServerSocket::WriteClientResponse(const std::string& Response){
 }
 
 /////////////////////////////debugging functions
-void ServerSocket::ClientMessageStream(){
+void ServerSocket::clientMessageStream(){
     int ret=-1;
     char ReadBuff[1024]{};
     size_t ReadBytes=0;

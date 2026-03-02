@@ -16,29 +16,29 @@ class ServerSocket{
     public: 
     sockaddr_in ConnectedClientAddress{};
 
-    bool CreateTCPSocket();
+    bool createTCPSocket();
 
-    bool BindTCPSocket(std::string ip,int port);
+    bool bindTCPSocket(std::string ip,int port);
     
-    bool ListenTCPSocket(int backlog);
+    bool listenTCPSocket(int backlog);
     
-    bool AcceptTCPSocket();
+    bool acceptTCPSocket();
 
-    int GiveSessionFD(); //this will be used by http_handler to get sessionFD
+    int giveSessionFD(); //this will be used by http_handler to get sessionFD
 
-    void PrintClientAddress();
+    void printClientAddress();
 
-    bool ReadClientRequest(); //used to parse the method requested by the client
+    bool readClientRequest(); //used to parse the method requested by the client
 
-    bool WriteClientResponse(const std::string& Response);//send appropriate response to client
+    bool writeClientResponse(const std::string& Response);//send appropriate response to client
 
-    void CloseClientSession();
+    void closeClientSession();
     
-    void CloseTCPSocket();
+    void closeTCPSocket();
     
-    void PrintServerAddress();
+    void printServerAddress();
 
 
     //////////DEBUGGING FUNCTIONS , NOT SAFE FOR PRODUCTION
-    void ClientMessageStream();
+    void clientMessageStream();
 };

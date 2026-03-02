@@ -3,23 +3,42 @@
 #pragma once
 #include<string>
 
-class http_handler{
+class HttpHandler{
     private:
     std::string RequestString="";
-    std::string RequestHeader="";
-    std::string RequestBody="";
     int SessionFD=-1;
-    int ResponseCode=0; 
+    int ResponseCode=0;
+    
+    req_resp_handler req_resp_handle;
+    request_type req_type; 
 
     public:
-    void GetSessionFD(int SesFD);
+    void getSessionFD(int SesFD);
     
-    void ReadClientRequest();
+    void readClientRequest();
 
-    size_t ParseContentLength(); //for Reading Body of Request
+    size_t parseContentLength(); //for Reading Body of Request
 
-    std::string SendClientResponse();
+    std::string sendClientResponse();
 
-    void PrintClientRequestString();
+    void printClientRequestString();
 
+};
+
+struct req_resp_handler{
+    std::string RequestLine="";
+    std::string RequestHeaders="";
+    std::string RequestBody="";
+
+    std::string ResponseStatusLine="";
+    std::string ResponseHeaders="";
+    std::string ResponseBody="";
+};
+
+enum struct request_type : int{
+    GET,
+    POST,
+    PUT,
+    DELETE_, //DELETE_ because delete is c++ reserved word
+    UNKNOWN
 };
