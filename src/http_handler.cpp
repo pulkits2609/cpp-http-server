@@ -10,16 +10,17 @@ void HttpHandler::getSessionFD(int SesFd){
 }
 
 void HttpHandler::readClientRequest(){
-    char ReadBuffer[512]{};
+    char read_buffer[512]{};
 
     RequestString.clear();
     req_resp_handle.RequestLine.clear();
     req_resp_handle.RequestHeaders.clear();
     req_resp_handle.RequestBody.clear();
+    ResponseCode = 0;
 
     while (RequestString.find("\r\n\r\n") == std::string::npos){
-        memset(ReadBuffer,0,sizeof(ReadBuffer));
-        int ret = read(SessionFD,ReadBuffer,sizeof(ReadBuffer));
+        memset(read_buffer,0,sizeof(read_buffer));
+        int ret = read(SessionFD,read_buffer,sizeof(read_buffer));
         if(ret==0){
             //marks the end of file , will arise when there is no body to read
             break;
@@ -30,7 +31,7 @@ void HttpHandler::readClientRequest(){
             return;
         }
         else{
-            RequestString.append(ReadBuffer,ret);
+            RequestString.append(read_buffer,ret);
         }
     }
     size_t req_line_end = RequestString.find("\r\n");
@@ -53,12 +54,12 @@ void HttpHandler::readClientRequest(){
 
     // Reading remaining body if incomplete
     while (req_resp_handle.RequestBody.size() < content_length) {
-        int ret = read(SessionFD, ReadBuffer, sizeof(ReadBuffer));
+        int ret = read(SessionFD, read_buffer, sizeof(read_buffer));
         if (ret <= 0) {
             perror("Error Reading Body:");
             return;
         }
-        req_resp_handle.RequestBody.append(ReadBuffer, ret);
+        req_resp_handle.RequestBody.append(read_buffer, ret);
     }
 }
 
@@ -68,15 +69,25 @@ size_t HttpHandler::parseContentLength(){
     if(pos == std::string::npos) return 0; //no body is there
 
     size_t value_start = pos + 15; // length of "Content-Length:"
-    while (req_resp_handle.RequestHeaders[value_start] == ' ')
+    while (req_resp_handle.RequestHeaders[value_start] == ' '){
         value_start++;
+    }    
 
     size_t value_end = req_resp_handle.RequestHeaders.find("\r\n", value_start);
+    if(value_end == std::string::npos){
+        return 0;
+    }
 
-    std::string length_str =
-        req_resp_handle.RequestHeaders.substr(value_start, value_end - value_start);
+    std::string length_str = req_resp_handle.RequestHeaders.substr(value_start, value_end - value_start);
 
-    return std::stoul(length_str);
+    //now if someone sends Content-Length: abcd the code might crash
+    try{
+        return std::stoul(length_str);
+    }
+    catch(...){
+        ResponseCode = 400;
+        return 0;
+    }
 }
 
 std::string HttpHandler::sendClientResponse(){
