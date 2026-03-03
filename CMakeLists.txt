@@ -10,6 +10,11 @@ add_executable(http_server
 	src/main.cpp
 	src/tcp_socket.cpp
 	src/http_handler.cpp
+	src/server.cpp
 )
 
 target_include_directories(http_server PRIVATE include)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(DEBUG_MODE)
+endif()

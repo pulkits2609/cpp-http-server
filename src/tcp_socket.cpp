@@ -6,7 +6,6 @@
 #include<unistd.h>
 #include<cstring>
 #include"tcp_socket.hpp"
-#define MAX_ALLOWED 1024
 
 bool ServerSocket::createTCPSocket(){
     SocketFD = socket(AF_INET,SOCK_STREAM,0); //create TCP Socket

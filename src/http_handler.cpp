@@ -12,17 +12,19 @@ void HttpHandler::getSessionFD(int SesFd){
 void HttpHandler::readClientRequest(){
     char read_buffer[512]{};
 
+    //clear struct data because same class object being used to handle every client
     RequestString.clear();
     req_resp_handle.RequestLine.clear();
     req_resp_handle.RequestHeaders.clear();
     req_resp_handle.RequestBody.clear();
-    ResponseCode = 0;
-
+    ResponseCode = 0;  
+    
+    //stop reading when CRLF CRLF Delimeter is found in RequestString
     while (RequestString.find("\r\n\r\n") == std::string::npos){
-        memset(read_buffer,0,sizeof(read_buffer));
+        memset(read_buffer,0,sizeof(read_buffer)); //clear read buffer before storing again 
         int ret = read(SessionFD,read_buffer,sizeof(read_buffer));
         if(ret==0){
-            //marks the end of file , will arise when there is no body to read
+            //marks the end of file , will arise when there is nothing to read
             break;
         }
         else if(ret < 0){
@@ -31,28 +33,29 @@ void HttpHandler::readClientRequest(){
             return;
         }
         else{
-            RequestString.append(read_buffer,ret);
+            RequestString.append(read_buffer,ret); //append read data to RequestString
         }
     }
-    size_t req_line_end = RequestString.find("\r\n");
+
+    size_t req_line_end = RequestString.find("\r\n"); //find the request line containing type of request and status code
     if(req_line_end == std::string::npos){
         ResponseCode = 400;
         return;
     }
     req_resp_handle.RequestLine = RequestString.substr(0,req_line_end);
-    req_line_end+=2;
-    size_t header_end = RequestString.find("\r\n\r\n");
+    req_line_end+=2; //for \r\n delimeter
+    size_t header_end = RequestString.find("\r\n\r\n"); //finding CRLF CRLF Delimeter again because when reading from session socket , its not guaranteed at all that apart from body only header will be read , there might be partial body reading too
     if(header_end == std::string::npos){
         ResponseCode = 400;
         return;
     }
-    req_resp_handle.RequestHeaders = RequestString.substr(req_line_end, header_end - req_line_end);
-    req_resp_handle.RequestBody = RequestString.substr(header_end + 4);
-
-    //Parse Content-Length
+    req_resp_handle.RequestHeaders = RequestString.substr(req_line_end, header_end - req_line_end); //header end - req_line end because we need to read the number of characters lelft in the string after reading status line , excluding the partial body read if any
+    req_resp_handle.RequestBody = RequestString.substr(header_end + 4); //remaining part of string , if read , is sent to request body
+    
+    //parse Content-Length
     size_t content_length = parseContentLength();
 
-    // Reading remaining body if incomplete
+    // reading remaining body if incomplete
     while (req_resp_handle.RequestBody.size() < content_length) {
         int ret = read(SessionFD, read_buffer, sizeof(read_buffer));
         if (ret <= 0) {
@@ -91,6 +94,11 @@ size_t HttpHandler::parseContentLength(){
 }
 
 std::string HttpHandler::sendClientResponse(){
+
+    if (req_resp_handle.RequestLine.find("/favicon.ico") != std::string::npos) {
+    return "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
+    }
+
     std::string Response = //creating basic minimal response
         "HTTP/1.1 200 OK\r\n"
         "Content-Type: text/plain\r\n"
@@ -103,8 +111,10 @@ std::string HttpHandler::sendClientResponse(){
 
 //DEBUGGING FUNCTION
 void HttpHandler::printClientRequestString(){
-    std::cout<<"Client Request header : \n";
+    std::cout<<"Client Request Status Line : \n";
+    std::cout<<"\n"<<req_resp_handle.RequestLine;
+    std::cout<<"\nClient Request header : \n";
     std::cout<<req_resp_handle.RequestHeaders<<"\n";
-    std::cout<<"Client Request Body :\n";
+    std::cout<<"\nClient Request Body :\n";
     std::cout<<req_resp_handle.RequestBody<<"\n";
 }
