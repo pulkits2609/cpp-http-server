@@ -4,3 +4,7 @@
 //  parsing headers into map
 //  parse body
 //  detection of malformed / wrong requests
+
+class HttpParser{
+    
+};

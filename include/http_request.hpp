@@ -5,3 +5,8 @@
 //  version
 //  headers (unordered_map)
 //  body
+
+class HttpRequest{
+    private:
+    
+};

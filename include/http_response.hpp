@@ -5,3 +5,7 @@
 //  headers
 //  body
 //  returning full response string (function)
+
+class HttpResponse{
+
+};

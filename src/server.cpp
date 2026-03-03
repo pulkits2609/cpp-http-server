@@ -1,3 +1,5 @@
+//server.cpp
+
 #include<server.hpp>
 #include<iostream>
 #include<sys/socket.h>
@@ -5,6 +7,8 @@
 #include<arpa/inet.h>
 #include<unistd.h>
 #include<cstring>
+#include<connection.hpp>
+
 
 #ifdef DEBUG_MODE
     #define DEBUG_LOG(x) std::cout<<x<<std::endl;
@@ -18,26 +22,55 @@ bool Server::createSocket(){
         perror("Error Creating Socket");
         return false;
     }
+    int opt=1;
+    if(setsockopt(socketfd,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt))){
+        perror("setsockopt failed :");
+        return false;
+    }
     std::cout<<"Server Socket Creation Successful\n";
     return true;
 }
 
 bool Server::bindToAddress(std::string ip, int port){
     serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = port;
+    serverAddress.sin_port = htons(port);
         if(!inet_pton(AF_INET,ip.data(),&serverAddress.sin_addr)){
-            DEBUG_LOG("Invalid IP Passed ")
+            std::cout<<"Invalid IP Passed\n";
             return false;
         }
     if(bind(socketfd, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0){
-        DEBUG_LOG("Binding Failed")
+        perror("Binding Failed : ");
         return false;
     }
+    std::cout<<"Binding Successful at Address : "<<inet_ntoa(serverAddress.sin_addr)<<ntohs(serverAddress.sin_port);
     return true;
+}
+
+bool Server::startListening(int backlog){
+    if(listen(socketfd,backlog) < 0){
+        perror("Error Listening : ");
+        return false;
+    }
+    std::cout<<":::::::::Server Listening::::::::";
+    return true;
+}
+
+void Server::acceptLoop(){
+    while(1){
+        sockaddr_in clientAddress{};
+        socklen_t cliLength= sizeof(clientAddress);
+        ClientConnection clientConnection{};
+        if(!clientConnection.getClientSession(accept(socketfd,(struct sockaddr*)&clientAddress,&cliLength))){
+            //meaning that if the Session FD is invalid
+            continue;
+        };
+        clientConnection.getClientAddress(clientAddress);
+        clientConnection.handleClient();
+    }
 }
 
 bool Server::closeSocket(){
     close(socketfd);
-    DEBUG_LOG("Socket Closed")
+    std::cout<<"::::::::Server Closed::::::\n";
     return true;
 }
