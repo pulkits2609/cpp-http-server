@@ -7,5 +7,9 @@
 //  returning full response string (function)
 
 class HttpResponse{
+    private:
 
+    
+    public:
+    void clearValues();
 };

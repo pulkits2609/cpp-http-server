@@ -9,7 +9,6 @@
 //  keep-alive (yes/no) 
 
 #include<iostream>
-#include<string>
 #include<arpa/inet.h>
 #include<http_method.hpp>
 #include<http_request.hpp>
@@ -20,14 +19,19 @@ class ClientConnection{
     private:
     int sessionfd=-1;
     char readBuffer[512]{};
+    std::string requestString{}; //raw request content
     HttpRequest request;  
     HttpResponse response;
     HttpMethod method;
     HttpParser parser;
     sockaddr_in clientAddress{};
-    
+
     public:
     bool getClientSession(int session);
     void getClientAddress(const sockaddr_in cliAddr);
     void handleClient(); //this will be handling the whole lifecycle of request response
+    bool readClientRequest();
+    void clearValues();
+    void closeClientConnection();
+    void printClientAddress();
 };

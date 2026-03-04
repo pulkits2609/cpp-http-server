@@ -8,8 +8,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(http_server
 	src/main.cpp
-	src/tcp_socket.cpp
-	src/http_handler.cpp
+	src/server.cpp
+	src/connection.cpp
+	src/http_parser.cpp
+	src/http_request.cpp
+	src/http_response.cpp
+	src/router.cpp
 	src/server.cpp
 )
 
