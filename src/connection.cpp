@@ -79,9 +79,32 @@ void ClientConnection::handleClient(){
         return;
     }
 
-    request.setStatusLine(parser.parseStatusLine(requestString));
+    auto tokens = parser.parseStatusLine(requestString);
+    if(tokens.empty()){
+        DEBUG_LOG("Invalid Request Line")
+        closeClientConnection();
+        return;
+    }
 
-    std::string headers = parser.parseHeaders(requestString);
+    HttpMethod method;
+    if(tokens[0] == "GET") method = HttpMethod::GET;
+    else if(tokens[0] == "POST") method = HttpMethod::POST;
+    else if(tokens[0] == "PUT") method = HttpMethod::PUT;
+    else if(tokens[0] == "DELETE") method = HttpMethod::DELETE_;
+    else method = HttpMethod::UNKNOWN;
+
+    request.setStatusLine(method, tokens[1], tokens[2]);    
+
+    std::unordered_map<std::string,std::string> headers;
+
+    ParseResult result = parser.parseHeaders(requestString, headers);
+
+    if(result != ParseResult::OK){
+        DEBUG_LOG("Malformed Headers")
+        closeClientConnection();
+        return;
+    }
+
     request.setHeaders(headers);
 
     size_t headerEnd = requestString.find("\r\n\r\n");
@@ -116,7 +139,7 @@ void ClientConnection::handleClient(){
 
     write(sessionfd, response.c_str(), response.size());    
 
-    request.printRequestData();
+    request.printRequestValues();
 
     closeClientConnection();
 }

@@ -6,14 +6,21 @@
 //  detection of malformed / wrong requests
 
 #include<iostream>
+#include<vector>
+#include<unordered_map>
 
+enum class ParseResult{
+    OK,
+    BAD_REQUEST,
+    INCOMPLETE
+};
 
 class HttpParser{
     private:
 
     public:
     void clearValues();
-    std::string parseStatusLine(const std::string& requestString);
-    std::string parseHeaders(const std::string& requestString);
-    size_t parseContentLength(const std::string& headers);
+    std::vector<std::string> parseStatusLine(const std::string& requestString);
+    ParseResult parseHeaders(const std::string& requestString, std::unordered_map<std::string, std::string>& headerMap);
+    size_t parseContentLength(const std::unordered_map<std::string,std::string>& headers);
 };

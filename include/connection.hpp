@@ -10,7 +10,6 @@
 
 #include<iostream>
 #include<arpa/inet.h>
-#include<http_method.hpp>
 #include<http_request.hpp>
 #include<http_response.hpp>
 #include<http_parser.hpp>
