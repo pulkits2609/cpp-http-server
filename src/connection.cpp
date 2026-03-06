@@ -29,7 +29,6 @@ void ClientConnection::getClientAddress(const sockaddr_in cliAddr){
 
 void ClientConnection::clearValues(){
 
-    memset(readBuffer,0,sizeof(readBuffer));
     memset(&clientAddress,0,sizeof(clientAddress));
     
     parser.clearValues();
@@ -75,6 +74,8 @@ void ClientConnection::handleClient(){
 
     if(!readClientRequest()){
         DEBUG_LOG("Bad Request From Client")
+        std::string resp = response.badRequestResponse();
+        write(sessionfd, resp.c_str(), resp.size()); 
         closeClientConnection();
         return;
     }
@@ -82,6 +83,8 @@ void ClientConnection::handleClient(){
     auto tokens = parser.parseStatusLine(requestString);
     if(tokens.empty()){
         DEBUG_LOG("Invalid Request Line")
+        std::string resp = response.badRequestResponse();
+        write(sessionfd, resp.c_str(), resp.size()); 
         closeClientConnection();
         return;
     }
@@ -91,7 +94,13 @@ void ClientConnection::handleClient(){
     else if(tokens[0] == "POST") method = HttpMethod::POST;
     else if(tokens[0] == "PUT") method = HttpMethod::PUT;
     else if(tokens[0] == "DELETE") method = HttpMethod::DELETE_;
-    else method = HttpMethod::UNKNOWN;
+    else{
+        DEBUG_LOG("UNKNOWN METHOD , BAD REQUEST") //not very likely to come because we have prior checks
+        std::string resp = response.badRequestResponse();
+        write(sessionfd, resp.c_str(), resp.size()); 
+        closeClientConnection();
+        return;
+    }
 
     request.setStatusLine(method, tokens[1], tokens[2]);    
 
@@ -101,6 +110,8 @@ void ClientConnection::handleClient(){
 
     if(result != ParseResult::OK){
         DEBUG_LOG("Malformed Headers")
+        std::string resp = response.badRequestResponse();
+        write(sessionfd, resp.c_str(), resp.size()); 
         closeClientConnection();
         return;
     }
@@ -109,35 +120,38 @@ void ClientConnection::handleClient(){
 
     size_t headerEnd = requestString.find("\r\n\r\n");
 
-    std::string bodyPart = requestString.substr(headerEnd + 4);
+    if(!(method == HttpMethod::GET)){ //only read content length and body if method is not GET
+        std::string bodyPart = requestString.substr(headerEnd + 4);
 
-    size_t contentLength = parser.parseContentLength(headers);
-
-    if(bodyPart.size() < contentLength){
-
-        while(bodyPart.size() < contentLength){
-
-            int ret = read(sessionfd, readBuffer, sizeof(readBuffer));
-
-            if(ret <= 0)
-                break;
-
-            bodyPart.append(readBuffer, ret);
+        size_t contentLength = parser.parseContentLength(headers);
+        if(contentLength > MAX_BODY_SIZE){
+            DEBUG_LOG("BODY LIMIT REACHED")
+            std::string resp = response.forbiddenRequestResponse();
+            write(sessionfd, resp.c_str(), resp.size());             
+            closeClientConnection();
+            return;
         }
+
+        if(bodyPart.size() < contentLength){
+
+            while(bodyPart.size() < contentLength){
+
+                int ret = read(sessionfd, readBuffer, sizeof(readBuffer));
+
+                if(ret <= 0)
+                    break;
+
+                bodyPart.append(readBuffer, ret);
+            }
+        }
+
+        request.setBody(bodyPart);
     }
 
-    request.setBody(bodyPart);
-
     // SEND BASIC RESPONSE
-    std::string response =
-        "HTTP/1.1 200 OK\r\n"
-        "Content-Type: text/plain\r\n"
-        "Content-Length: 5\r\n"
-        "Connection: close\r\n"
-        "\r\n"
-        "Hello";
+    std::string resp = response.defaultRequestResponse();
 
-    write(sessionfd, response.c_str(), response.size());    
+    write(sessionfd, resp.c_str(), resp.size());    
 
     request.printRequestValues();
 

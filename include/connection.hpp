@@ -24,6 +24,7 @@ class ClientConnection{
     HttpMethod method;
     HttpParser parser;
     sockaddr_in clientAddress{};
+    const size_t MAX_BODY_SIZE = 1024*1024; //1MB
 
     public:
     bool getClientSession(int session);

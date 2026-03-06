@@ -1,6 +1,7 @@
 #include<iostream>
 #include<string>
 #include<http_parser.hpp>
+#include<algorithm>
 
 ParseResult HttpParser::parseHeaders(const std::string& requestString,
 std::unordered_map<std::string, std::string>& headerMap)
@@ -29,15 +30,23 @@ std::unordered_map<std::string, std::string>& headerMap)
         }
 
         std::string key = headerString.substr(headerStart, colon - headerStart);
+        std::transform(key.begin(),key.end(),key.begin(),::tolower);
         std::string value = headerString.substr(colon + 1, headerEnd - (colon + 1));
 
         // trim leading spaces from value
-        while(!value.empty() && value.front() == ' ')
+        while(!value.empty() && value.front() == ' '){
             value.erase(value.begin());
+        }
 
         // trim trailing spaces from value
-        while(!value.empty() && value.back() == ' ')
+        while(!value.empty() && value.back() == ' '){
             value.pop_back();
+        }
+        
+        //trim keys 
+        while(!key.empty()&& key.back()==' '){
+            key.pop_back();
+        }
 
         headerMap[key] = value;
 
@@ -55,15 +64,28 @@ std::unordered_map<std::string, std::string>& headerMap)
         }
 
         std::string key = headerString.substr(headerStart, colon - headerStart);
+        std::transform(key.begin(),key.end(),key.begin(),::tolower);
         std::string value = headerString.substr(colon + 1);
 
-        while(!value.empty() && value.front() == ' ')
+        //trim value
+        while(!value.empty() && value.front() == ' '){
             value.erase(value.begin());
+        }
 
-        while(!value.empty() && value.back() == ' ')
+        while(!value.empty() && value.back() == ' '){
             value.pop_back();
+        }
+
+        //trim keys 
+        while(!key.empty()&& key.back()==' '){
+            key.pop_back();
+        }
 
         headerMap[key] = value;
+    }
+
+    if(headerMap.find("host")==headerMap.end()){
+        return ParseResult::BAD_REQUEST;
     }
 
     return ParseResult::OK;
@@ -71,7 +93,7 @@ std::unordered_map<std::string, std::string>& headerMap)
 
 size_t HttpParser::parseContentLength(const std::unordered_map<std::string,std::string>& headers)
 {
-    auto it = headers.find("Content-Length");
+    auto it = headers.find("content-length");
 
     if(it == headers.end())
         return 0;

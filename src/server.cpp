@@ -9,13 +9,6 @@
 #include<cstring>
 #include<connection.hpp>
 
-
-#ifdef DEBUG_MODE
-    #define DEBUG_LOG(x) std::cout<<x<<std::endl;
-#else
-    #define DEBUG_LOG(x)
-#endif
-
 bool Server::createSocket(){
     socketfd = socket(AF_INET, SOCK_STREAM, 0);
     if(socketfd < 0){
@@ -42,7 +35,7 @@ bool Server::bindToAddress(std::string ip, int port){
         perror("Binding Failed : ");
         return false;
     }
-    std::cout<<"Binding Successful at Address : "<<inet_ntoa(serverAddress.sin_addr)<<ntohs(serverAddress.sin_port);
+    std::cout<<"Binding Successful at Address : "<<inet_ntoa(serverAddress.sin_addr)<<":"<<ntohs(serverAddress.sin_port)<<"\n";
     return true;
 }
 
@@ -51,7 +44,7 @@ bool Server::startListening(int backlog){
         perror("Error Listening : ");
         return false;
     }
-    std::cout<<":::::::::Server Listening::::::::";
+    std::cout<<":::::::::Server Listening::::::::\n";
     return true;
 }
 
