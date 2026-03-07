@@ -13,7 +13,7 @@ void HttpRequest::clearValues(){
     method= HttpMethod::UNKNOWN;
     path="";
     version="";
-    headers.empty();
+    headers.clear(); ///this one wont give a warning when building project
     body="";
 }
 

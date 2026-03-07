@@ -10,6 +10,17 @@
 #include<string>
 #include<unordered_map>
 
+enum class HttpStatus {
+    OK = 200, 
+    CREATED = 201, 
+    NO_CONTENT = 204, 
+    BAD_REQUEST = 400, 
+    FORBIDDEN = 403,
+    NOT_FOUND = 404, 
+    METHOD_NOT_ALLOWED = 405, 
+    INTERNAL_SERVER_ERROR = 500
+};
+
 class HttpResponse{
     private:
     size_t statusCode{};
@@ -19,7 +30,9 @@ class HttpResponse{
     
     public:
     void clearValues();
-    std::string badRequestResponse();
-    std::string forbiddenRequestResponse();
-    std::string defaultRequestResponse();
+    void setStatus(HttpStatus status);
+    void setHeader(std::string key, std::string value);
+    void setBody(std::string body);
+
+    std::string buildResponse();
 };

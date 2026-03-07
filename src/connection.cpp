@@ -74,7 +74,13 @@ void ClientConnection::handleClient(){
 
     if(!readClientRequest()){
         DEBUG_LOG("Bad Request From Client")
-        std::string resp = response.badRequestResponse();
+
+        response.clearValues();
+        response.setStatus(HttpStatus::BAD_REQUEST);
+        response.setHeader("Content-Type","text/plain");
+        response.setBody("Bad Request");
+
+        std::string resp = response.buildResponse();
         write(sessionfd, resp.c_str(), resp.size()); 
         closeClientConnection();
         return;
@@ -83,7 +89,13 @@ void ClientConnection::handleClient(){
     auto tokens = parser.parseStatusLine(requestString);
     if(tokens.empty()){
         DEBUG_LOG("Invalid Request Line")
-        std::string resp = response.badRequestResponse();
+
+        response.clearValues();
+        response.setStatus(HttpStatus::BAD_REQUEST);
+        response.setHeader("Content-Type","text/plain");
+        response.setBody("Bad Request");
+
+        std::string resp = response.buildResponse();
         write(sessionfd, resp.c_str(), resp.size()); 
         closeClientConnection();
         return;
@@ -96,7 +108,13 @@ void ClientConnection::handleClient(){
     else if(tokens[0] == "DELETE") method = HttpMethod::DELETE_;
     else{
         DEBUG_LOG("UNKNOWN METHOD , BAD REQUEST") //not very likely to come because we have prior checks
-        std::string resp = response.badRequestResponse();
+        
+        response.clearValues();
+        response.setStatus(HttpStatus::BAD_REQUEST);
+        response.setHeader("Content-Type","text/plain");
+        response.setBody("Bad Request");
+
+        std::string resp = response.buildResponse();
         write(sessionfd, resp.c_str(), resp.size()); 
         closeClientConnection();
         return;
@@ -110,7 +128,13 @@ void ClientConnection::handleClient(){
 
     if(result != ParseResult::OK){
         DEBUG_LOG("Malformed Headers")
-        std::string resp = response.badRequestResponse();
+
+        response.clearValues();
+        response.setStatus(HttpStatus::BAD_REQUEST);
+        response.setHeader("Content-Type","text/plain");
+        response.setBody("Bad Request");
+
+        std::string resp = response.buildResponse();
         write(sessionfd, resp.c_str(), resp.size()); 
         closeClientConnection();
         return;
@@ -126,7 +150,12 @@ void ClientConnection::handleClient(){
         size_t contentLength = parser.parseContentLength(headers);
         if(contentLength > MAX_BODY_SIZE){
             DEBUG_LOG("BODY LIMIT REACHED")
-            std::string resp = response.forbiddenRequestResponse();
+            response.clearValues();
+            response.setStatus(HttpStatus::FORBIDDEN);
+            response.setHeader("Content-Type","text/plain");
+            response.setBody("FORBIDDEN REQUEST , Body Too Large");
+
+            std::string resp = response.buildResponse();
             write(sessionfd, resp.c_str(), resp.size());             
             closeClientConnection();
             return;
@@ -148,9 +177,13 @@ void ClientConnection::handleClient(){
         request.setBody(bodyPart);
     }
 
-    // SEND BASIC RESPONSE
-    std::string resp = response.defaultRequestResponse();
+    //send response
+    response.clearValues();
+    response.setStatus(HttpStatus::OK);
+    response.setHeader("Content-Type","text/plain");
+    response.setBody("Hello From Server");
 
+    std::string resp = response.buildResponse();
     write(sessionfd, resp.c_str(), resp.size());    
 
     request.printRequestValues();
