@@ -8,14 +8,17 @@
 
 //mainly this will be handling server lifecycle
 
+#pragma once
 #include<iostream>
 #include<arpa/inet.h>
 #include<string>
+#include<router.hpp> //server will own the router , not client
 
 class Server{
     private:
     int socketfd = -1;
     sockaddr_in serverAddress{};
+    Router router{};
 
     public:
     bool createSocket();
@@ -23,4 +26,5 @@ class Server{
     bool startListening(int backlog);
     void acceptLoop();
     bool closeSocket();
+    Router& giveRouterInstance();
 };

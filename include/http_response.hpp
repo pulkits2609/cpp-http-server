@@ -6,6 +6,7 @@
 //  body
 //  returning full response string (function)
 
+#pragma once
 #include<iostream>
 #include<string>
 #include<unordered_map>

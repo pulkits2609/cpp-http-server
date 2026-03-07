@@ -52,7 +52,7 @@ void Server::acceptLoop(){
     while(1){
         sockaddr_in clientAddress{};
         socklen_t cliLength= sizeof(clientAddress);
-        ClientConnection clientConnection{};
+        ClientConnection clientConnection(giveRouterInstance());
         if(!clientConnection.getClientSession(accept(socketfd,(struct sockaddr*)&clientAddress,&cliLength))){
             //meaning that if the Session FD is invalid
             continue;
@@ -66,4 +66,8 @@ bool Server::closeSocket(){
     close(socketfd);
     std::cout<<"::::::::Server Closed::::::\n";
     return true;
+}
+
+Router& Server::giveRouterInstance(){
+    return router;
 }

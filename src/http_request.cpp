@@ -31,6 +31,14 @@ void HttpRequest::setBody(const std::string bodyData){
     body = bodyData;
 }
 
+HttpMethod HttpRequest::getMethod() const{
+    return method;
+}
+
+std::string HttpRequest::getPath() const{
+    return path;
+}
+
 void HttpRequest::printRequestValues(){
 
     DEBUG_LOG("=========== HTTP REQUEST ===========")

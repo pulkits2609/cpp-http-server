@@ -5,6 +5,7 @@
 //  parse body
 //  detection of malformed / wrong requests
 
+#pragma once
 #include<iostream>
 #include<vector>
 #include<unordered_map>

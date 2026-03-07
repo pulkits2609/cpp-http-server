@@ -6,6 +6,7 @@
 //  headers (unordered_map)
 //  body
 
+#pragma once
 #include<iostream>
 #include<http_method.hpp>
 #include<unordered_map>
@@ -24,4 +25,6 @@ class HttpRequest{
     void setHeaders(const std::unordered_map<std::string,std::string> head_mp);
     void printRequestValues();
     void setBody(const std::string bodyData);
+    HttpMethod getMethod() const;
+    std::string getPath() const;
 };

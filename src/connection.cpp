@@ -179,12 +179,9 @@ void ClientConnection::handleClient(){
 
     //send response
     response.clearValues();
-    response.setStatus(HttpStatus::OK);
-    response.setHeader("Content-Type","text/plain");
-    response.setBody("Hello From Server");
-
-    std::string resp = response.buildResponse();
-    write(sessionfd, resp.c_str(), resp.size());    
+    HttpResponse res = router.route(request);
+    std::string resp = res.buildResponse();
+    write(sessionfd, resp.c_str(), resp.size());
 
     request.printRequestValues();
 
