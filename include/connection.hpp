@@ -23,7 +23,6 @@ class ClientConnection{
     std::string requestString{}; //raw request content
     HttpRequest request;  
     HttpResponse response;
-    HttpMethod method;
     HttpParser parser;
     sockaddr_in clientAddress{};
     const size_t MAX_BODY_SIZE = 1024*1024; //1MB

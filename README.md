@@ -54,8 +54,64 @@ Supported parsing features:
 - request body reading based on content length
 - support for custom HTTP headers
 - malformed request detection and rejection
+- HTTP/1.1 `Host` header validation
 
-Parsed request data is stored in a clean internal representation that will later be used by routing and response handling components.
+Example internal request representation:
+
+```cpp
+HttpMethod method;
+std::string path;
+std::string version;
+std::unordered_map<std::string,std::string> headers;
+std::string body;
+```
+---
+
+## HTTP Response Builder
+
+Responses are generated through a structured `HttpResponse` class.
+
+Features:
+
+- HTTP status code handling
+- status text generation
+- header management
+- automatic `Content-Length`
+- response serialization
+
+Example generated response:
+
+```cpp
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 5
+Connection: close
+Hello
+```
+
+---
+
+## Router System
+
+A simple router maps `(method, path)` pairs to handler functions.
+
+Example route:
+
+```cpp
+router.add(HttpMethod::GET, "/", [](const HttpRequest& req){
+    HttpResponse res;
+    res.setStatus(HttpStatus::OK);
+    res.setBody("Hello from Router");
+    return res;
+});
+```
+
+If no route is found the server returns:
+
+```cpp
+HTTP/1.1 404 Not Found
+```
+
 
 This project is being developed incrementally to demonstrate understanding of **low-level networking, HTTP protocol mechanics, and scalable server architecture design**.
 
