@@ -14,7 +14,7 @@ add_executable(http_server
 	src/http_request.cpp
 	src/http_response.cpp
 	src/router.cpp
-	src/server.cpp
+	src/thread_pool.cpp
 )
 
 target_include_directories(http_server PRIVATE include)

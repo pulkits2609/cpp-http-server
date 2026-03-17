@@ -13,12 +13,14 @@
 #include<arpa/inet.h>
 #include<string>
 #include<router.hpp> //server will own the router , not client
+#include<thread_pool.hpp>
 
 class Server{
     private:
     int socketfd = -1;
     sockaddr_in serverAddress{};
     Router router{};
+    ThreadPool* threadPool = nullptr;
 
     public:
     bool createSocket();

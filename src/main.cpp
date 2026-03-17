@@ -17,6 +17,17 @@ int main(int argc, char* argv[]){
         return -1;
     }
     Srv.startListening(5);
+
+    //assign router to server
+    Router& router = Srv.giveRouterInstance();
+    router.add(HttpMethod::GET, "/", [](const HttpRequest& req){
+        HttpResponse res;
+        res.setStatus(HttpStatus::OK);
+        res.setHeader("Content-Type","text/plain");
+        res.setBody("Hello From Server");
+        return res;
+    });
+
     Srv.acceptLoop();
     Srv.closeSocket();
 

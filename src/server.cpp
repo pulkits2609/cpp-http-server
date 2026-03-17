@@ -48,22 +48,47 @@ bool Server::startListening(int backlog){
     return true;
 }
 
+// void Server::acceptLoop(){
+//     while(1){
+//         sockaddr_in clientAddress{};
+//         socklen_t cliLength= sizeof(clientAddress);
+//         ClientConnection clientConnection(giveRouterInstance());
+//         if(!clientConnection.getClientSession(accept(socketfd,(struct sockaddr*)&clientAddress,&cliLength))){
+//             //meaning that if the Session FD is invalid
+//             continue;
+//         };
+//         clientConnection.getClientAddress(clientAddress);
+//         clientConnection.handleClient();
+//     }
+// }
+
 void Server::acceptLoop(){
+    //create thread pool
+    size_t threads=std::thread::hardware_concurrency();
+    if(threads==0) threads=4;
+
+    threadPool=new ThreadPool(threads, router);
+
     while(1){
         sockaddr_in clientAddress{};
         socklen_t cliLength= sizeof(clientAddress);
-        ClientConnection clientConnection(giveRouterInstance());
-        if(!clientConnection.getClientSession(accept(socketfd,(struct sockaddr*)&clientAddress,&cliLength))){
-            //meaning that if the Session FD is invalid
+        int sessionfd = accept(socketfd,(struct sockaddr*)&clientAddress,&cliLength);
+        if(sessionfd < 0){
             continue;
-        };
-        clientConnection.getClientAddress(clientAddress);
-        clientConnection.handleClient();
+        }
+        //push job to thread pool instead of handling directly
+        threadPool->enqueue(sessionfd, clientAddress);
     }
 }
 
 bool Server::closeSocket(){
     close(socketfd);
+
+    if(threadPool){
+        delete threadPool;
+        threadPool=nullptr;
+    }
+    
     std::cout<<"::::::::Server Closed::::::\n";
     return true;
 }
